@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120" fill="none">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@900&amp;display=swap');
+    </style>
+  </defs>
+  <text x="200" y="88" text-anchor="middle" font-family="'Inter', Arial Black, sans-serif" font-weight="900" font-size="96" fill="currentColor" letter-spacing="-4">n&#xF8;ne.</text>
+</svg>
