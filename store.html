@@ -241,7 +241,7 @@
 
     .product-card {
       cursor: pointer;
-      group: true;
+      display: block;
     }
     .product-card__image {
       aspect-ratio: 3 / 4;
@@ -266,6 +266,31 @@
     .product-card:hover .product-card__image svg {
       opacity: 0.25;
       transform: scale(1.03);
+    }
+    .product-card__buy {
+      position: absolute;
+      bottom: 1rem;
+      left: 1rem;
+      right: 1rem;
+      background: var(--white);
+      color: var(--black);
+      font-family: var(--font-sans);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-align: center;
+      padding: 0.85rem;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: all 0.3s var(--transition);
+    }
+    .product-card:hover .product-card__buy {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .product-card__buy:hover {
+      background: var(--gray-200);
     }
     .product-card__badge {
       position: absolute;
@@ -685,11 +710,12 @@
     <div class="product-grid">
 
       <!-- Product 1 -->
-      <div class="product-card">
+      <a class="product-card" href="https://buy.stripe.com/6oU4gy7X33iK2MsfYt5sA04" target="_blank" rel="noopener">
         <div class="product-card__image">
           <svg viewBox="0 0 400 450" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M120 40L80 60L40 100L70 130L100 100V400H300V100L330 130L360 100L320 60L280 40C270 70 240 90 200 90C160 90 130 70 120 40Z" stroke="currentColor" stroke-width="2"/>
           </svg>
+          <span class="product-card__buy">Buy Now</span>
         </div>
         <div class="product-card__info">
           <div>
@@ -698,14 +724,15 @@
           </div>
           <span class="product-card__price">&euro;45</span>
         </div>
-      </div>
+      </a>
 
       <!-- Product 2 -->
-      <div class="product-card">
+      <a class="product-card" href="https://buy.stripe.com/6oU4gy7X33iK2MsfYt5sA04" target="_blank" rel="noopener">
         <div class="product-card__image" style="background:var(--gray-700);">
           <svg viewBox="0 0 400 450" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M120 40L80 60L40 100L70 130L100 100V400H300V100L330 130L360 100L320 60L280 40C270 70 240 90 200 90C160 90 130 70 120 40Z" stroke="currentColor" stroke-width="2"/>
           </svg>
+          <span class="product-card__buy">Buy Now</span>
         </div>
         <div class="product-card__info">
           <div>
@@ -714,16 +741,17 @@
           </div>
           <span class="product-card__price">&euro;45</span>
         </div>
-      </div>
+      </a>
 
       <!-- Product 3 -->
-      <div class="product-card">
+      <a class="product-card" href="https://buy.stripe.com/6oU4gy7X33iK2MsfYt5sA04" target="_blank" rel="noopener">
         <div class="product-card__image">
           <svg viewBox="0 0 400 450" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M120 40L80 60L40 100L70 130L100 100V400H300V100L330 130L360 100L320 60L280 40C270 70 240 90 200 90C160 90 130 70 120 40Z" stroke="currentColor" stroke-width="2" fill="none"/>
             <path d="M100 100V400H300V100" stroke="currentColor" stroke-width="1" stroke-dasharray="4 4" opacity="0.3"/>
           </svg>
           <span class="product-card__badge">New</span>
+          <span class="product-card__buy">Buy Now</span>
         </div>
         <div class="product-card__info">
           <div>
@@ -732,14 +760,15 @@
           </div>
           <span class="product-card__price">&euro;55</span>
         </div>
-      </div>
+      </a>
 
       <!-- Product 4 -->
-      <div class="product-card">
+      <a class="product-card" href="https://buy.stripe.com/6oU4gy7X33iK2MsfYt5sA04" target="_blank" rel="noopener">
         <div class="product-card__image" style="background:#1a1a1a;">
           <svg viewBox="0 0 400 450" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M120 40L80 60L40 100L70 130L100 100V400H300V100L330 130L360 100L320 60L280 40C270 70 240 90 200 90C160 90 130 70 120 40Z" stroke="currentColor" stroke-width="3"/>
           </svg>
+          <span class="product-card__buy">Buy Now</span>
         </div>
         <div class="product-card__info">
           <div>
@@ -748,15 +777,16 @@
           </div>
           <span class="product-card__price">&euro;60</span>
         </div>
-      </div>
+      </a>
 
       <!-- Product 5 -->
-      <div class="product-card">
+      <a class="product-card" href="https://buy.stripe.com/6oU4gy7X33iK2MsfYt5sA04" target="_blank" rel="noopener">
         <div class="product-card__image" style="background:var(--gray-700);">
           <svg viewBox="0 0 400 450" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M120 40L80 60L40 100L70 130L100 100V400H300V100L330 130L360 100L320 60L280 40C270 70 240 90 200 90C160 90 130 70 120 40Z" stroke="currentColor" stroke-width="2"/>
             <line x1="100" y1="160" x2="300" y2="160" stroke="currentColor" stroke-width="0.5" opacity="0.3"/>
           </svg>
+          <span class="product-card__buy">Buy Now</span>
         </div>
         <div class="product-card__info">
           <div>
@@ -765,10 +795,10 @@
           </div>
           <span class="product-card__price">&euro;50</span>
         </div>
-      </div>
+      </a>
 
       <!-- Product 6 -->
-      <div class="product-card">
+      <a class="product-card" href="https://buy.stripe.com/6oU4gy7X33iK2MsfYt5sA04" target="_blank" rel="noopener">
         <div class="product-card__image">
           <svg viewBox="0 0 400 500" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M130 40L90 55L50 95L80 125L110 95V450H290V95L320 125L350 95L310 55L270 40C260 70 240 85 200 85C160 85 140 70 130 40Z" stroke="currentColor" stroke-width="2"/>
@@ -776,6 +806,7 @@
             <path d="M290 95H350V250H290" stroke="currentColor" stroke-width="2" fill="none"/>
           </svg>
           <span class="product-card__badge">New</span>
+          <span class="product-card__buy">Buy Now</span>
         </div>
         <div class="product-card__info">
           <div>
@@ -784,7 +815,7 @@
           </div>
           <span class="product-card__price">&euro;55</span>
         </div>
-      </div>
+      </a>
 
     </div>
   </section>
