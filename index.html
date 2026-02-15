@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>none. &mdash; Fit Validation Protocol</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --black: #0a0a0a;
+      --white: #f5f5f5;
+      --gray-100: #e5e5e5;
+      --gray-200: #d4d4d4;
+      --gray-300: #a3a3a3;
+      --gray-400: #737373;
+      --gray-500: #525252;
+      --gray-600: #404040;
+      --gray-700: #262626;
+      --gray-800: #171717;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'Space Mono', monospace;
+      --transition: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    html { font-size: 16px; scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--black);
+      color: var(--white);
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── Progress Bar ─── */
+    .progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--gray-700);
+      z-index: 100;
+    }
+    .progress-bar__fill {
+      height: 100%;
+      background: var(--white);
+      width: 0%;
+      transition: width 0.6s var(--transition);
+    }
+
+    /* ─── Header ─── */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 1.5rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 90;
+      background: linear-gradient(to bottom, var(--black) 60%, transparent);
+      pointer-events: none;
+    }
+    .header > * { pointer-events: all; }
+    .logo {
+      font-family: var(--font-mono);
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--white);
+      text-decoration: none;
+    }
+    .logo span { color: var(--gray-400); }
+    .step-indicator {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--gray-400);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    /* ─── Container ─── */
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* ─── Sections ─── */
+    .section {
+      min-height: 100vh;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      padding: 6rem 0 4rem;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s var(--transition), transform 0.5s var(--transition);
+    }
+    .section.active {
+      display: flex;
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .section.fade-out {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+
+    /* ─── Welcome Screen ─── */
+    .welcome { text-align: center; justify-content: center; align-items: center; }
+    .welcome__title {
+      font-family: var(--font-mono);
+      font-size: clamp(2.5rem, 8vw, 5rem);
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+    .welcome__subtitle {
+      font-size: 0.875rem;
+      color: var(--gray-400);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 3rem;
+    }
+    .welcome__description {
+      font-size: 1rem;
+      line-height: 1.7;
+      color: var(--gray-300);
+      max-width: 480px;
+      margin-bottom: 3rem;
+    }
+
+    /* ─── Section Headers ─── */
+    .section__tag {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gray-400);
+      margin-bottom: 0.75rem;
+    }
+    .section__title {
+      font-size: clamp(1.5rem, 4vw, 2rem);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.75rem;
+      line-height: 1.2;
+    }
+    .section__desc {
+      font-size: 0.9rem;
+      color: var(--gray-300);
+      line-height: 1.6;
+      margin-bottom: 2.5rem;
+      max-width: 540px;
+    }
+
+    /* ─── Form Elements ─── */
+    .form-group {
+      margin-bottom: 2rem;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--gray-300);
+      margin-bottom: 0.75rem;
+    }
+    .form-group .hint {
+      font-size: 0.75rem;
+      color: var(--gray-500);
+      margin-top: 0.4rem;
+      font-style: italic;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    input[type="number"],
+    input[type="email"],
+    textarea {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--gray-600);
+      color: var(--white);
+      font-family: var(--font-sans);
+      font-size: 1.1rem;
+      padding: 0.75rem 0;
+      outline: none;
+      transition: border-color 0.3s var(--transition);
+    }
+    input:focus,
+    textarea:focus {
+      border-bottom-color: var(--white);
+    }
+    input::placeholder,
+    textarea::placeholder {
+      color: var(--gray-600);
+    }
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+      line-height: 1.6;
+    }
+
+    /* ─── Radio & Checkbox Cards ─── */
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+    .options-grid--2col {
+      grid-template-columns: 1fr 1fr;
+    }
+    .options-grid--3col {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .option-card {
+      position: relative;
+      cursor: pointer;
+      display: block;
+    }
+    .option-card input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .option-card__body {
+      border: 1px solid var(--gray-700);
+      padding: 1rem 1.25rem;
+      transition: all 0.25s var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .option-card__body:hover {
+      border-color: var(--gray-400);
+    }
+    .option-card input:checked + .option-card__body {
+      border-color: var(--white);
+      background: var(--gray-800);
+    }
+    .option-card__indicator {
+      width: 18px;
+      height: 18px;
+      border: 1.5px solid var(--gray-500);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s var(--transition);
+    }
+    .option-card__indicator--radio { border-radius: 50%; }
+    .option-card__indicator--checkbox { border-radius: 2px; }
+    .option-card input:checked + .option-card__body .option-card__indicator {
+      border-color: var(--white);
+    }
+    .option-card input:checked + .option-card__body .option-card__indicator::after {
+      content: '';
+      display: block;
+    }
+    .option-card input[type="radio"]:checked + .option-card__body .option-card__indicator::after {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--white);
+    }
+    .option-card input[type="checkbox"]:checked + .option-card__body .option-card__indicator::after {
+      width: 10px;
+      height: 10px;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 10 10' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1.5 5.5L4 8L8.5 2' stroke='%23f5f5f5' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    }
+    .option-card__label {
+      font-size: 0.9rem;
+      color: var(--gray-200);
+      line-height: 1.4;
+    }
+
+    /* ─── Range Slider ─── */
+    .range-container {
+      padding: 1rem 0;
+    }
+    .range-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      color: var(--gray-500);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 1rem;
+    }
+    .range-value {
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      color: var(--white);
+    }
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 2px;
+      background: var(--gray-700);
+      outline: none;
+      border: none;
+      padding: 0;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--white);
+      cursor: pointer;
+      border: none;
+      transition: transform 0.2s;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--white);
+      cursor: pointer;
+      border: none;
+    }
+
+    /* ─── Measurement Card ─── */
+    .measurement-card {
+      border: 1px solid var(--gray-700);
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    .measurement-card__header {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .measurement-card__icon {
+      flex-shrink: 0;
+      width: 80px;
+      height: 80px;
+    }
+    .measurement-card__icon svg {
+      width: 100%;
+      height: 100%;
+    }
+    .measurement-card__info h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+    }
+    .measurement-card__info p {
+      font-size: 0.8rem;
+      color: var(--gray-400);
+      line-height: 1.5;
+    }
+    .measurement-card__input {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .measurement-card__input input {
+      max-width: 160px;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 1.25rem;
+    }
+    .measurement-card__input .unit {
+      font-size: 0.8rem;
+      color: var(--gray-500);
+      font-family: var(--font-mono);
+    }
+
+    /* ─── File Upload ─── */
+    .upload-area {
+      border: 1px dashed var(--gray-600);
+      padding: 3rem 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s var(--transition);
+    }
+    .upload-area:hover {
+      border-color: var(--gray-400);
+    }
+    .upload-area.has-file {
+      border-color: var(--white);
+      border-style: solid;
+    }
+    .upload-area input[type="file"] {
+      display: none;
+    }
+    .upload-area__icon {
+      margin-bottom: 1rem;
+    }
+    .upload-area__icon svg {
+      width: 32px;
+      height: 32px;
+      stroke: var(--gray-400);
+    }
+    .upload-area__text {
+      font-size: 0.85rem;
+      color: var(--gray-400);
+    }
+    .upload-area__text strong {
+      color: var(--white);
+    }
+    .upload-area__filename {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--white);
+      margin-top: 0.5rem;
+      display: none;
+    }
+    .upload-area.has-file .upload-area__filename {
+      display: block;
+    }
+
+    /* ─── Buttons ─── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--font-sans);
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 1rem 2.5rem;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s var(--transition);
+      text-decoration: none;
+    }
+    .btn--primary {
+      background: var(--white);
+      color: var(--black);
+    }
+    .btn--primary:hover {
+      background: var(--gray-200);
+      transform: translateY(-1px);
+    }
+    .btn--outline {
+      background: transparent;
+      color: var(--white);
+      border: 1px solid var(--gray-600);
+    }
+    .btn--outline:hover {
+      border-color: var(--white);
+    }
+    .btn--ghost {
+      background: transparent;
+      color: var(--gray-400);
+      padding: 1rem 0;
+    }
+    .btn--ghost:hover {
+      color: var(--white);
+    }
+
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--gray-800);
+    }
+    .nav-buttons .btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* ─── Thank You Screen ─── */
+    .thankyou {
+      text-align: center;
+      align-items: center;
+    }
+    .thankyou__icon {
+      width: 64px;
+      height: 64px;
+      border: 2px solid var(--white);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 2rem;
+    }
+    .thankyou__icon svg {
+      width: 28px;
+      height: 28px;
+      stroke: var(--white);
+    }
+    .thankyou__title {
+      font-family: var(--font-mono);
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 1rem;
+    }
+    .thankyou__text {
+      font-size: 1rem;
+      color: var(--gray-300);
+      line-height: 1.7;
+      max-width: 420px;
+    }
+
+    /* ─── T-shirt Illustration SVGs ─── */
+    .tshirt-specs-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+    @media (max-width: 520px) {
+      .tshirt-specs-grid { grid-template-columns: 1fr; }
+      .options-grid--2col { grid-template-columns: 1fr; }
+      .options-grid--3col { grid-template-columns: 1fr; }
+    }
+
+    .spec-card {
+      border: 1px solid var(--gray-700);
+      padding: 1.25rem;
+    }
+    .spec-card__label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--gray-400);
+      margin-bottom: 0.75rem;
+      font-family: var(--font-mono);
+    }
+    .spec-card input,
+    .spec-card textarea {
+      font-size: 0.95rem;
+    }
+    .spec-card textarea {
+      min-height: 60px;
+    }
+
+    /* ─── Divider ─── */
+    .divider {
+      width: 40px;
+      height: 1px;
+      background: var(--gray-600);
+      margin: 2rem 0;
+    }
+
+    /* ─── Animations ─── */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-in {
+      animation: fadeInUp 0.6s var(--transition) forwards;
+    }
+    .delay-1 { animation-delay: 0.1s; opacity: 0; }
+    .delay-2 { animation-delay: 0.2s; opacity: 0; }
+    .delay-3 { animation-delay: 0.3s; opacity: 0; }
+    .delay-4 { animation-delay: 0.4s; opacity: 0; }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 640px) {
+      .header { padding: 1rem 1.25rem; }
+      .container { padding: 0 1.25rem; }
+      .measurement-card { padding: 1.25rem; }
+      .measurement-card__header { flex-direction: column; }
+      .section { padding: 5rem 0 3rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Progress Bar -->
+  <div class="progress-bar">
+    <div class="progress-bar__fill" id="progressFill"></div>
+  </div>
+
+  <!-- Header -->
+  <header class="header">
+    <a href="#" class="logo" onclick="goToStep(0); return false;">none<span>.</span></a>
+    <div class="step-indicator" id="stepIndicator"></div>
+  </header>
+
+  <main class="container">
+
+    <!-- ════════════════════════════════════════ -->
+    <!-- STEP 0: WELCOME -->
+    <!-- ════════════════════════════════════════ -->
+    <section class="section welcome active" data-step="0">
+      <h1 class="welcome__title animate-in">none<span style="color:var(--gray-500)">.</span></h1>
+      <p class="welcome__subtitle animate-in delay-1">Fit Validation Protocol</p>
+      <p class="welcome__description animate-in delay-2">
+        Help us design the perfect t-shirt. Your body measurements, fit preferences, and honest feedback shape every stitch. This takes about 5 minutes.
+      </p>
+      <div class="animate-in delay-3">
+        <button class="btn btn--primary" onclick="nextStep()">
+          Begin
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════ -->
+    <!-- STEP 1: IDENTITY -->
+    <!-- ════════════════════════════════════════ -->
+    <section class="section" data-step="1">
+      <p class="section__tag">#1 &mdash; Your Identity</p>
+      <h2 class="section__title">Who are you?</h2>
+      <p class="section__desc">For tracing results. Your data stays confidential and is used only for fit research.</p>
+
+      <div class="form-group">
+        <label for="fullName">Full Name</label>
+        <input type="text" id="fullName" placeholder="Enter your full name">
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" placeholder="your@email.com">
+      </div>
+
+      <div class="form-group">
+        <label for="dob">Date of Birth</label>
+        <input type="date" id="dob">
+      </div>
+
+      <div class="form-group">
+        <label for="gender">Gender Identity</label>
+        <input type="text" id="gender" placeholder="M, F, NB/X, or self-identify">
+        <p class="hint">However you identify &mdash; we want to know.</p>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn--ghost" onclick="prevStep()">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 8H3M7 4L3 8l4 4"/></svg>
+          Back
+        </button>
+        <button class="btn btn--primary" onclick="nextStep()">
+          Continue
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════ -->
+    <!-- STEP 2: BODY MEASUREMENTS -->
+    <!-- ════════════════════════════════════════ -->
+    <section class="section" data-step="2">
+      <p class="section__tag">Section 1 &mdash; Garment Fit</p>
+      <h2 class="section__title">Body Measurements</h2>
+      <p class="section__desc">Measure yourself or estimate. These help us understand how garments should fit your frame.</p>
+
+      <!-- Chest -->
+      <div class="measurement-card">
+        <div class="measurement-card__header">
+          <div class="measurement-card__icon">
+            <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 25C25 18 35 15 40 15C45 15 55 18 60 25" stroke="#f5f5f5" stroke-width="1" stroke-linecap="round"/>
+              <path d="M15 40C15 32 18 27 20 25" stroke="#f5f5f5" stroke-width="1" stroke-linecap="round"/>
+              <path d="M65 40C65 32 62 27 60 25" stroke="#f5f5f5" stroke-width="1" stroke-linecap="round"/>
+              <path d="M15 40V60" stroke="#f5f5f5" stroke-width="1" stroke-linecap="round"/>
+              <path d="M65 40V60" stroke="#f5f5f5" stroke-width="1" stroke-linecap="round"/>
+              <line x1="18" y1="38" x2="62" y2="38" stroke="#f5f5f5" stroke-width="0.5" stroke-dasharray="3 2"/>
+              <circle cx="18" cy="38" r="2" fill="#f5f5f5"/>
+              <circle cx="62" cy="38" r="2" fill="#f5f5f5"/>
+            </svg>
+          </div>
+          <div class="measurement-card__info">
+            <h3>Chest / Bust</h3>
+            <p>Measure across the chest from armpit to armpit. This tells us how comfortable the fit is around your torso.</p>
+          </div>
+        </div>
+        <div class="measurement-card__input">
+          <input type="number" id="chest" placeholder="0">
+          <span class="unit">cm</span>
+        </div>
+      </div>
+
+      <!-- Shoulders -->
+      <div class="measurement-card">
+        <div class="measurement-card__header">
+          <div class="measurement-card__icon">
+            <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 30C28 22 36 20 40 20C44 20 52 22 60 30" stroke="#f5f5f5" stroke-width="1" stroke-linecap="round"/>
+              <path d="M10 42C10 36 14 32 20 30" stroke="#f5f5f5" stroke-width="1" stroke-linecap="round"/>
+              <path d="M70 42C70 36 66 32 60 30" stroke="#f5f5f5" stroke-width="1" stroke-linecap="round"/>
+              <circle cx="20" cy="30" r="2.5" fill="#f5f5f5"/>
+              <circle cx="60" cy="30" r="2.5" fill="#f5f5f5"/>
+              <line x1="20" y1="30" x2="60" y2="30" stroke="#f5f5f5" stroke-width="0.5" stroke-dasharray="3 2"/>
+            </svg>
+          </div>
+          <div class="measurement-card__info">
+            <h3>Shoulder Points</h3>
+            <p>Shoulder to shoulder width. Determines how the shirt sits on your frame and where the seam falls.</p>
+          </div>
+        </div>
+        <div class="measurement-card__input">
+          <input type="number" id="shoulders" placeholder="0">
+          <span class="unit">cm</span>
+        </div>
+      </div>
+
+      <!-- Collar/Neckline -->
+      <div class="measurement-card">
+        <div class="measurement-card__header">
+          <div class="measurement-card__icon">
+            <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M28 35C32 28 36 25 40 25C44 25 48 28 52 35" stroke="#f5f5f5" stroke-width="1" stroke-linecap="round"/>
+              <path d="M40 25V18" stroke="#f5f5f5" stroke-width="1" stroke-linecap="round"/>
+              <ellipse cx="40" cy="16" rx="8" ry="4" stroke="#f5f5f5" stroke-width="0.5" stroke-dasharray="3 2"/>
+              <path d="M20 42C20 38 24 36 28 35" stroke="#f5f5f5" stroke-width="1" stroke-linecap="round"/>
+              <path d="M60 42C60 38 56 36 52 35" stroke="#f5f5f5" stroke-width="1" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="measurement-card__info">
+            <h3>Collar / Neckline</h3>
+            <p>Front neckline opening. Affects comfort around the neck and the overall look of the garment.</p>
+          </div>
+        </div>
+        <div class="measurement-card__input">
+          <input type="number" id="collar" placeholder="0">
+          <span class="unit">cm</span>
+        </div>
+      </div>
+
+      <!-- Body Length -->
+      <div class="measurement-card">
+        <div class="measurement-card__header">
+          <div class="measurement-card__icon">
+            <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M30 15H50L55 20V65H25V20Z" stroke="#f5f5f5" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M30 15C33 20 37 22 40 22C43 22 47 20 50 15" stroke="#f5f5f5" stroke-width="1"/>
+              <path d="M25 20H20V45H25" stroke="#f5f5f5" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M55 20H60V45H55" stroke="#f5f5f5" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+              <line x1="40" y1="18" x2="40" y2="65" stroke="#f5f5f5" stroke-width="0.5" stroke-dasharray="3 2"/>
+              <circle cx="40" cy="18" r="2" fill="#f5f5f5"/>
+              <circle cx="40" cy="65" r="2" fill="#f5f5f5"/>
+            </svg>
+          </div>
+          <div class="measurement-card__info">
+            <h3>Body Length (Front)</h3>
+            <p>From the collar seam down to the bottom hem. Tells us how long or short the t-shirt should be.</p>
+          </div>
+        </div>
+        <div class="measurement-card__input">
+          <input type="number" id="bodyLength" placeholder="0">
+          <span class="unit">cm</span>
+        </div>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn--ghost" onclick="prevStep()">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 8H3M7 4L3 8l4 4"/></svg>
+          Back
+        </button>
+        <button class="btn btn--primary" onclick="nextStep()">
+          Continue
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════ -->
+    <!-- STEP 3: FIT PREFERENCE -->
+    <!-- ════════════════════════════════════════ -->
+    <section class="section" data-step="3">
+      <p class="section__tag">Section 1 &mdash; continued</p>
+      <h2 class="section__title">Fit Preference</h2>
+      <p class="section__desc">How do you like your t-shirt to fit? Select all that apply to your ideal silhouette.</p>
+
+      <div class="form-group">
+        <label>Preferred Fit Style</label>
+        <div class="options-grid">
+          <label class="option-card">
+            <input type="checkbox" name="fit" value="loose">
+            <div class="option-card__body">
+              <div class="option-card__indicator option-card__indicator--checkbox"></div>
+              <span class="option-card__label">Loose / Boxy / Oversized</span>
+            </div>
+          </label>
+          <label class="option-card">
+            <input type="checkbox" name="fit" value="relaxed">
+            <div class="option-card__body">
+              <div class="option-card__indicator option-card__indicator--checkbox"></div>
+              <span class="option-card__label">Relaxed</span>
+            </div>
+          </label>
+          <label class="option-card">
+            <input type="checkbox" name="fit" value="regular">
+            <div class="option-card__body">
+              <div class="option-card__indicator option-card__indicator--checkbox"></div>
+              <span class="option-card__label">Regular / Classic Fit</span>
+            </div>
+          </label>
+          <label class="option-card">
+            <input type="checkbox" name="fit" value="slim">
+            <div class="option-card__body">
+              <div class="option-card__indicator option-card__indicator--checkbox"></div>
+              <span class="option-card__label">Slim / Fitted</span>
+            </div>
+          </label>
+          <label class="option-card">
+            <input type="checkbox" name="fit" value="tight">
+            <div class="option-card__body">
+              <div class="option-card__indicator option-card__indicator--checkbox"></div>
+              <span class="option-card__label">Tight / Bodycon</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="form-group">
+        <label for="preferredSize">Preferred Body Size</label>
+        <div class="options-grid options-grid--3col">
+          <label class="option-card">
+            <input type="radio" name="size" value="S">
+            <div class="option-card__body" style="justify-content:center;">
+              <span class="option-card__label" style="font-family:var(--font-mono);font-weight:700;">S</span>
+            </div>
+          </label>
+          <label class="option-card">
+            <input type="radio" name="size" value="M">
+            <div class="option-card__body" style="justify-content:center;">
+              <span class="option-card__label" style="font-family:var(--font-mono);font-weight:700;">M</span>
+            </div>
+          </label>
+          <label class="option-card">
+            <input type="radio" name="size" value="L">
+            <div class="option-card__body" style="justify-content:center;">
+              <span class="option-card__label" style="font-family:var(--font-mono);font-weight:700;">L</span>
+            </div>
+          </label>
+          <label class="option-card">
+            <input type="radio" name="size" value="XL">
+            <div class="option-card__body" style="justify-content:center;">
+              <span class="option-card__label" style="font-family:var(--font-mono);font-weight:700;">XL</span>
+            </div>
+          </label>
+          <label class="option-card">
+            <input type="radio" name="size" value="2XL">
+            <div class="option-card__body" style="justify-content:center;">
+              <span class="option-card__label" style="font-family:var(--font-mono);font-weight:700;">2XL</span>
+            </div>
+          </label>
+          <label class="option-card">
+            <input type="radio" name="size" value="3XL">
+            <div class="option-card__body" style="justify-content:center;">
+              <span class="option-card__label" style="font-family:var(--font-mono);font-weight:700;">3XL</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn--ghost" onclick="prevStep()">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 8H3M7 4L3 8l4 4"/></svg>
+          Back
+        </button>
+        <button class="btn btn--primary" onclick="nextStep()">
+          Continue
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════ -->
+    <!-- STEP 4: T-SHIRT BLUEPRINT -->
+    <!-- ════════════════════════════════════════ -->
+    <section class="section" data-step="4">
+      <p class="section__tag">#2 &mdash; T-Shirt Blueprint</p>
+      <h2 class="section__title">Fabric &amp; Texture</h2>
+      <p class="section__desc">The weight and feel of the cotton defines the character of the garment.</p>
+
+      <div class="form-group">
+        <label>Cotton Texture / Thickness</label>
+        <div class="options-grid">
+          <label class="option-card">
+            <input type="radio" name="texture" value="light">
+            <div class="option-card__body">
+              <div class="option-card__indicator option-card__indicator--radio"></div>
+              <div>
+                <span class="option-card__label" style="font-weight:500;">Light / Thin</span>
+                <p style="font-size:0.75rem;color:var(--gray-500);margin-top:0.25rem;">Soft, flowy feel. Breathable and lightweight.</p>
+              </div>
+            </div>
+          </label>
+          <label class="option-card">
+            <input type="radio" name="texture" value="mid">
+            <div class="option-card__body">
+              <div class="option-card__indicator option-card__indicator--radio"></div>
+              <div>
+                <span class="option-card__label" style="font-weight:500;">Mid-Weight / Standard</span>
+                <p style="font-size:0.75rem;color:var(--gray-500);margin-top:0.25rem;">Balanced structure and comfort. The everyday tee.</p>
+              </div>
+            </div>
+          </label>
+          <label class="option-card">
+            <input type="radio" name="texture" value="heavy">
+            <div class="option-card__body">
+              <div class="option-card__indicator option-card__indicator--radio"></div>
+              <div>
+                <span class="option-card__label" style="font-weight:500;">Heavy / Thick</span>
+                <p style="font-size:0.75rem;color:var(--gray-500);margin-top:0.25rem;">Substantial, structured. Premium hand-feel with body.</p>
+              </div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="form-group">
+        <label for="blueprintNotes">Additional Notes / Modifications</label>
+        <textarea id="blueprintNotes" placeholder="Any specific requests about fabric, wash, or construction..."></textarea>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn--ghost" onclick="prevStep()">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 8H3M7 4L3 8l4 4"/></svg>
+          Back
+        </button>
+        <button class="btn btn--primary" onclick="nextStep()">
+          Continue
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════ -->
+    <!-- STEP 5: T-SHIRT SPECS -->
+    <!-- ════════════════════════════════════════ -->
+    <section class="section" data-step="5">
+      <p class="section__tag">#2 &mdash; continued</p>
+      <h2 class="section__title">Construction Specs</h2>
+      <p class="section__desc">Detail your preferences for each structural element of the t-shirt.</p>
+
+      <div class="tshirt-specs-grid">
+        <div class="spec-card">
+          <div class="spec-card__label">Collar / Neckline Style</div>
+          <textarea name="specCollar" placeholder="e.g. Crew neck, V-neck, scoop, ribbed binding..."></textarea>
+        </div>
+        <div class="spec-card">
+          <div class="spec-card__label">Hem / Bottom</div>
+          <textarea name="specHem" placeholder="e.g. Straight hem, curved, raw edge, banded..."></textarea>
+        </div>
+        <div class="spec-card">
+          <div class="spec-card__label">Seams / Stitch Detail</div>
+          <textarea name="specSeams" placeholder="e.g. Flat-felled, reinforced, minimal visible stitching..."></textarea>
+        </div>
+        <div class="spec-card">
+          <div class="spec-card__label">Sleeve Style / Cut</div>
+          <textarea name="specSleeve" placeholder="e.g. Regular set-in, raglan, drop shoulder, rolled..."></textarea>
+        </div>
+      </div>
+
+      <div class="measurement-card">
+        <div class="measurement-card__header">
+          <div class="measurement-card__icon">
+            <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M40 20L25 28V50L40 55" stroke="#f5f5f5" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M25 28L10 42V50" stroke="#f5f5f5" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+              <line x1="26" y1="30" x2="12" y2="44" stroke="#f5f5f5" stroke-width="0.5" stroke-dasharray="3 2"/>
+              <circle cx="26" cy="30" r="2" fill="#f5f5f5"/>
+              <circle cx="12" cy="44" r="2" fill="#f5f5f5"/>
+            </svg>
+          </div>
+          <div class="measurement-card__info">
+            <h3>Arm / Sleeve Length</h3>
+            <p>From shoulder seam to sleeve cuff. Measured in centimeters.</p>
+          </div>
+        </div>
+        <div class="measurement-card__input">
+          <input type="number" id="armLength" placeholder="0">
+          <span class="unit">cm</span>
+        </div>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn--ghost" onclick="prevStep()">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 8H3M7 4L3 8l4 4"/></svg>
+          Back
+        </button>
+        <button class="btn btn--primary" onclick="nextStep()">
+          Continue
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════ -->
+    <!-- STEP 6: FIT CHECK -->
+    <!-- ════════════════════════════════════════ -->
+    <section class="section" data-step="6">
+      <p class="section__tag">#3 &mdash; Fit Check</p>
+      <h2 class="section__title">Visual Validation</h2>
+      <p class="section__desc">Upload a try-on photo or rate how your current t-shirts fit. This helps us calibrate.</p>
+
+      <div class="form-group">
+        <label>Upload Photo (optional)</label>
+        <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+          <input type="file" id="fileInput" accept="image/*" onchange="handleFileUpload(this)">
+          <div class="upload-area__icon">
+            <svg viewBox="0 0 32 32" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 20V6M16 6L11 11M16 6L21 11" stroke="currentColor"/>
+              <path d="M4 22v4a2 2 0 002 2h20a2 2 0 002-2v-4" stroke="currentColor"/>
+            </svg>
+          </div>
+          <p class="upload-area__text">Click to upload or drag &amp; drop<br><strong>JPG, PNG</strong> up to 10MB</p>
+          <p class="upload-area__filename" id="fileName"></p>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="form-group">
+        <label>Fit Score</label>
+        <p style="font-size:0.8rem;color:var(--gray-400);margin-bottom:1.5rem;">
+          Rate the fit of your best-fitting t-shirt. 1 = terrible, 10 = perfect.
+        </p>
+        <div class="range-container">
+          <div class="range-value" id="fitScoreValue">5</div>
+          <input type="range" id="fitScore" min="1" max="10" value="5" oninput="document.getElementById('fitScoreValue').textContent = this.value">
+          <div class="range-labels">
+            <span>1 &mdash; Terrible</span>
+            <span>10 &mdash; Perfect</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn--ghost" onclick="prevStep()">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 8H3M7 4L3 8l4 4"/></svg>
+          Back
+        </button>
+        <button class="btn btn--primary" onclick="nextStep()">
+          Continue
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════ -->
+    <!-- STEP 7: FINAL WORDS -->
+    <!-- ════════════════════════════════════════ -->
+    <section class="section" data-step="7">
+      <p class="section__tag">#4 &mdash; Final Words</p>
+      <h2 class="section__title">Your Feedback</h2>
+      <p class="section__desc">Last step. Tell us what matters to you in your own words.</p>
+
+      <div class="form-group">
+        <label for="experience">Experience &amp; Feedback</label>
+        <textarea id="experience" placeholder="Tell us what you liked, disliked, or wish existed in t-shirts today..."></textarea>
+        <p class="hint">In 1&ndash;2&ndash;3 sentences. Be honest.</p>
+      </div>
+
+      <div class="form-group">
+        <label for="improvements">Improvements / Suggestions</label>
+        <textarea id="improvements" placeholder="What would you change? What would make the perfect t-shirt for you?"></textarea>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn--ghost" onclick="prevStep()">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 8H3M7 4L3 8l4 4"/></svg>
+          Back
+        </button>
+        <button class="btn btn--primary" onclick="submitForm()">
+          Submit
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8l5 5L14 3"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════ -->
+    <!-- STEP 8: THANK YOU -->
+    <!-- ════════════════════════════════════════ -->
+    <section class="section thankyou" data-step="8">
+      <div class="thankyou__icon animate-in">
+        <svg viewBox="0 0 28 28" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 14l7 7L23 7"/>
+        </svg>
+      </div>
+      <h2 class="thankyou__title animate-in delay-1">Thank you.</h2>
+      <p class="thankyou__text animate-in delay-2">
+        Your responses have been recorded. Every data point helps us craft something closer to perfect. We'll be in touch.
+      </p>
+      <div class="animate-in delay-3" style="margin-top:2.5rem;">
+        <button class="btn btn--outline" onclick="resetForm()">Start Over</button>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // ─── State ───
+    let currentStep = 0;
+    const totalSteps = 8; // 0=welcome through 7=final, 8=thankyou
+
+    // ─── Navigation ───
+    function goToStep(step) {
+      if (step < 0 || step > totalSteps) return;
+
+      const currentSection = document.querySelector(`.section[data-step="${currentStep}"]`);
+      const nextSection = document.querySelector(`.section[data-step="${step}"]`);
+
+      if (currentSection) {
+        currentSection.classList.add('fade-out');
+        setTimeout(() => {
+          currentSection.classList.remove('active', 'fade-out');
+        }, 300);
+      }
+
+      setTimeout(() => {
+        if (nextSection) {
+          nextSection.classList.add('active');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        currentStep = step;
+        updateProgress();
+        updateStepIndicator();
+      }, currentSection ? 300 : 0);
+    }
+
+    function nextStep() {
+      goToStep(currentStep + 1);
+    }
+
+    function prevStep() {
+      goToStep(currentStep - 1);
+    }
+
+    // ─── Progress ───
+    function updateProgress() {
+      const progress = (currentStep / totalSteps) * 100;
+      document.getElementById('progressFill').style.width = progress + '%';
+    }
+
+    function updateStepIndicator() {
+      const indicator = document.getElementById('stepIndicator');
+      if (currentStep === 0) {
+        indicator.textContent = '';
+      } else if (currentStep === totalSteps) {
+        indicator.textContent = 'Complete';
+      } else {
+        indicator.textContent = `${currentStep} / ${totalSteps - 1}`;
+      }
+    }
+
+    // ─── File Upload ───
+    function handleFileUpload(input) {
+      const area = document.getElementById('uploadArea');
+      const nameEl = document.getElementById('fileName');
+      if (input.files && input.files[0]) {
+        area.classList.add('has-file');
+        nameEl.textContent = input.files[0].name;
+      } else {
+        area.classList.remove('has-file');
+        nameEl.textContent = '';
+      }
+    }
+
+    // ─── Form Submission ───
+    function submitForm() {
+      // Collect all form data
+      const formData = {
+        identity: {
+          name: document.getElementById('fullName')?.value,
+          email: document.getElementById('email')?.value,
+          dob: document.getElementById('dob')?.value,
+          gender: document.getElementById('gender')?.value,
+        },
+        measurements: {
+          chest: document.getElementById('chest')?.value,
+          shoulders: document.getElementById('shoulders')?.value,
+          collar: document.getElementById('collar')?.value,
+          bodyLength: document.getElementById('bodyLength')?.value,
+        },
+        fit: {
+          styles: [...document.querySelectorAll('input[name="fit"]:checked')].map(el => el.value),
+          size: document.querySelector('input[name="size"]:checked')?.value,
+        },
+        blueprint: {
+          texture: document.querySelector('input[name="texture"]:checked')?.value,
+          notes: document.getElementById('blueprintNotes')?.value,
+        },
+        specs: {
+          collar: document.querySelector('textarea[name="specCollar"]')?.value,
+          hem: document.querySelector('textarea[name="specHem"]')?.value,
+          seams: document.querySelector('textarea[name="specSeams"]')?.value,
+          sleeve: document.querySelector('textarea[name="specSleeve"]')?.value,
+          armLength: document.getElementById('armLength')?.value,
+        },
+        fitCheck: {
+          score: document.getElementById('fitScore')?.value,
+        },
+        feedback: {
+          experience: document.getElementById('experience')?.value,
+          improvements: document.getElementById('improvements')?.value,
+        },
+        submittedAt: new Date().toISOString(),
+      };
+
+      console.log('Form submitted:', formData);
+
+      // In production, send to backend:
+      // fetch('/api/submit', { method: 'POST', body: JSON.stringify(formData) });
+
+      goToStep(totalSteps);
+    }
+
+    function resetForm() {
+      // Reset all inputs
+      document.querySelectorAll('input[type="text"], input[type="email"], input[type="date"], input[type="number"], textarea').forEach(el => el.value = '');
+      document.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(el => el.checked = false);
+      document.getElementById('fitScore').value = 5;
+      document.getElementById('fitScoreValue').textContent = '5';
+      document.getElementById('uploadArea').classList.remove('has-file');
+      document.getElementById('fileName').textContent = '';
+      goToStep(0);
+    }
+
+    // ─── Keyboard Navigation ───
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+        if (currentStep > 0 && currentStep < totalSteps - 1) {
+          nextStep();
+        }
+      }
+    });
+
+    // ─── Init ───
+    updateProgress();
+    updateStepIndicator();
+  </script>
+
+</body>
+</html>
